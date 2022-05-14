@@ -5,7 +5,7 @@ Idea: Lets make this our todo-list and slowly transition it into a workload dist
 
 MOST URGENT:
 
-    1) Check present sources in more detail, to see what useful information it contains
+    1) Check present sources in more detail, to see what useful information they contain
     2) Based on that, decide what to cut down on & What do focus on. Plan of action for our model?
     3) Based on that, find even more sources
 
