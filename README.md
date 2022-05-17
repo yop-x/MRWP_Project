@@ -15,4 +15,4 @@ FIRST STEPS - CODING
     2) Read CSVs into suitable datastructure (nested list or dict), filter out or correct cells if necessary
 
 FIRST STEPS - REPORT
-    1) Create file (lol)
+    1) Look up source 9 (pwp) for current limitations on combining ABMs with Social Networks
