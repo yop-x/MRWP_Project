@@ -3,6 +3,11 @@ Students: Emiel Robben, Leah Dollo, Tim Döring, YOOOOP
 
 Idea: Lets make this our todo-list and slowly transition it into a workload distribution record
 
+UPDATES:
+    - We decided to focus on Zurich (instead of all of Switzerland)
+    - How did gouvernment restrictions in response to the COVID-19 pandemic affect first year student's ability to find new friends? An ABM model combined with
+      a social network, simulating the case of Zurich based on real data.
+
 MOST URGENT:
 
     1) Check present sources in more detail, to see what useful information they contain
