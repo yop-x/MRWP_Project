@@ -11,6 +11,7 @@ UPDATES:
       
       
  Project Structure (as proposed by Tim):
+ 
       - Initialize the map of Zurich more or less realistically (libraries for students, occasions for recreational time spending (bars, cinemas, restaurants, etc), university campus, ...)
       - Find a realistic ratio between first year students and other students/young adults that are relevant for a social network
       - Initialize a social network between the present young adults (those that lived in Zurich before COVID)
