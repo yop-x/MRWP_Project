@@ -3,6 +3,8 @@ Students: Emiel Robben, Leah Dollo, Tim Döring, YOOOOP
 
 Idea: Lets make this our todo-list and slowly transition it into a workload distribution record
 
+Final report: https://www.overleaf.com/9652717651bmnjydqwzqbx
+
 UPDATES:
 
 1) We decided to focus on Zurich (instead of all of Switzerland)
