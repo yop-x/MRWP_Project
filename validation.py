@@ -10,7 +10,7 @@ import pandas as pd
 import pickle
 import numpy as np
 from multiprocessing import Pool
-from analyse_network import analyse
+from model import analyse_network
 from fast_model import run
 from scipy import optimize
 
@@ -24,6 +24,8 @@ stds = [stat_name + '_std' for stat_name in stat_names]
 
 # good paramter values
 DELTA = 0.3
+#We added RHO during this project
+RHO = 0.1
 GAMMA = 0.5
 C = 0.25
 B1, B2, B3 = 0.05, 0.07, 0.09

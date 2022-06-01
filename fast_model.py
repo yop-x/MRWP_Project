@@ -109,8 +109,38 @@ class Model:
         a = (self.g.g.T.dot(self.g.g[i, :]) * self.U)[i]
         a[i] = 0
         indirect_u = np.sum(a)
+        #triadic connection gain
+        triads_u = self.triads[i] * self.U[i]
 
-        return direct_u + GAMMA * mutual_u + DELTA * indirect_u - d_i ** ALPHA * C
+        #total utility
+        return direct_u + GAMMA * mutual_u + DELTA * indirect_u + RHO* triads_u- d_i ** ALPHA * C
+
+    def V_total(self, i):
+        #Set the potential of the components initially to 0
+        d_i_V = 0
+        direct_V = 0
+        mutual_V = 0
+        indirect_V = 0
+        triads_V = 0
+        #Let's sum over the different components to get the potential of those components
+        for i in range(len(self.g.g)):
+            d_i = self.g.g[i].sum()
+            direct_u = np.sum(self.g.g[i] * self.U[i])
+            mutual_u = np.sum(self.g.g[i] * self.g.g.T[i] * self.U[i])
+            #indirect
+            a = (self.g.g.T.dot(self.g.g[i, :]) * self.U)[i]
+            a[i] = 0
+            indirect_u = np.sum(a)
+
+            triads_u = self.triads[i] * self.U[i]
+            #here the summing up really begins
+            direct_V += direct_u
+            mutual_V += mutual_u
+            triads_V += triads_u
+            indirect_V += indirect_u
+            d_i_V += d_i ** ALPHA * C
+        #total potential. It will be called in def run
+        V_tot = direct_V + GAMMA * mutual_V + DELTA * indirect_V + RHO * triads_V - d_i_V
 
     def step(self):
         """ Randomly selects an agent i to revise their link with another random
@@ -139,6 +169,7 @@ class Model:
             else:
                 self.g.g[i, r1] = 1
 
+        self.triads= np.diagonal(np.linalg.matrix_power(self.g, 3))
 
     def save2pickle(self, pickle_name):
         """
@@ -179,6 +210,8 @@ class Model:
                 # stop if there were 0 changes in the last n_zeros_conv periods
                 if t > n_zeros_conv and all(last_changes==np.zeros(n_zeros_conv)):
                     print('Converged after {} steps'.format(t+1))
+                    #print the potential at convergence as well
+                    print('The total potential of the network at convergence was:', V_tot )
                     break
             
             # Print a statement if simulation did not converge
@@ -252,9 +285,9 @@ def run(settings, X):
     :param schools:  lsit of schools based on index number
     :return: The outcome of the analyse function in a dict, ordered the same way as schools.
     '''
-    global DELTA, GAMMA, C, B1, B2, B3, SIGMA, ALPHA, MIN_PROP, pos_link, MINIMAL, MAX_FRIEND, n_zeros_conv
+    global DELTA, GAMMA, RHO, C, B1, B2, B3, SIGMA, ALPHA, MIN_PROP, pos_link, MINIMAL, MAX_FRIEND, n_zeros_conv
 
-    DELTA, GAMMA, C, SIGMA, B1, B2, B3 = settings
+    DELTA, RHO, GAMMA, C, SIGMA, B1, B2, B3 = settings
 
     # Constants
     MAX_FRIEND = 5  # maximum of 5 male and 5 female friends in the questionaire
@@ -285,3 +318,5 @@ def run(settings, X):
     M.rank()  # chooses best 5 female and male friends
 
     return M.g.g
+
+
