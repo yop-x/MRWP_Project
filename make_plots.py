@@ -24,12 +24,13 @@ settings =  [0.05, 0.65, 0.1, 0.175, 0.035, 0.1, 0.1, 0.2]
 
 label = {'av_degree':'average degree',
          'mut_prop':'propotion of mutual dyads',
+         'triad_prop':'proportion of triads', 
          'clustering_coefficient':'clustering coefficient',
          'segreg_ind2':'segregation grade',
          'segreg_ind1':'segregation race',
          'segreg_ind0':'segregation sex'}
 
-_string = ['av_degree', 'mut_prop', 'clustering_coefficient', 'segreg_ind2', 'segreg_ind1', 'segreg_ind0']
+_string = ['av_degree', 'mut_prop', 'triad_prop', 'clustering_coefficient', 'segreg_ind2', 'segreg_ind1', 'segreg_ind0']
 
 
 # Uncertainty analysis
