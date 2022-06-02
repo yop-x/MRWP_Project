@@ -34,7 +34,7 @@ share_red = 1/3
 share_blue = 1/3
 share_green = 1 - share_red - share_blue
 possible_X = [1,2,3] # coding of the types
-possible_Y = [1,2,3]
+
 
 # Simulation parameters
 T = 5000 # Maximum iterations
@@ -46,11 +46,11 @@ t_conv = 10 # if g does not change for t_conv periods we have reached convergenc
 def u(i, j, X, Y) :
     """ Returns the partial utility given X_i and X_j using the exp(-b*L1-norm
     of their difference)"""
-    return math.exp(-b * np.linalg.norm((X[i] - X[j]), ord=1)) * math.exp(- z * np.linalg.norm((1- (Y[i] - Y[j]), ord=1)))
+    return math.exp(-b * np.linalg.norm((X[i] - X[j]), ord=1))
 ## where do we get X from? 
 
 
-def U(i, g, X, Y ) :
+def U(i, g, X ) :
     """ Returns the full utility of agent i given the current network structure
     g and the matrix of characteristics X """
     d_i = sum(g[i])  # degree of i
@@ -89,7 +89,7 @@ def V(i, g, X):
 
     cost = 0
     for i in range(n):
-        cost += alpha * c * sum(g[i])  # degree of i
+        cost += c * sum(g[i]) ** alpha  # degree of i
     direct_u = 0
     for i in range(n):
         for j in range(n):
