@@ -57,7 +57,7 @@ class NetworkModel:
         self.n = n
         self.pos_X = pos_X
         self.g = g
-      #  self.triads = np.diagonal(np.linalg.matrix_power(self.g, 1))
+        self.triads = np.diagonal(np.linalg.matrix_power(self.g.g, 3))
         self.spatial = spatial
         self.X = X
         self.U = self.make_pre_cal_U()
@@ -65,6 +65,7 @@ class NetworkModel:
 
         self.indexes = list(range(n))
         self.g_sequence = None
+        #self.triads = np.diagonal(np.linalg.matrix_power(self.g, 3))
 
     def make_prop(self):
         '''
@@ -87,7 +88,7 @@ class NetworkModel:
         return prop
 
     def make_pre_cal_U(self):
-        DELTA, RHO, GAMMA, C, SIGMA, B1, B2, B3 = settings_lst
+        DELTA, GAMMA, RHO, C, SIGMA, B1, B2, B3 = settings_lst
         print(B1)
         """ Make the U matrix for the entire system
         """
@@ -132,11 +133,11 @@ class NetworkModel:
         indirect_u = np.sum(a)
         #triadic connection gain
         try:
-            triads_u = self.triads[i] * self.U[i]
+            triads_u = int(self.triads[i] * self.U[i])
         except:
-            triads_u = self.U[i]
+            triads_u = 0
         #total utility
-        return direct_u + GAMMA * mutual_u + DELTA * indirect_u - d_i ** ALPHA * C # + RHO * triads_u
+        return direct_u + GAMMA * mutual_u + DELTA * indirect_u + RHO * triads_u - d_i ** ALPHA * C
 
     def V_total(self, i):
         #Set the potential of the components initially to 0
@@ -205,7 +206,10 @@ class NetworkModel:
             else:
                 self.g.g[i, r1] = 1
 
-        # self.triads= np.diagonal(np.linalg.matrix_power(self.g, 3))
+        matrix_3 = np.linalg.matrix_power(self.g.g, 3)
+        #print(type(matrix_3))
+        #print(matrix_3)
+        self.triads = np.diagonal(matrix_3)
 
     def save2pickle(self, pickle_name):
         """
@@ -323,7 +327,7 @@ def run(settings, X):
     '''
     global DELTA, GAMMA, RHO, C, B1, B2, B3, SIGMA, ALPHA, MIN_PROP, pos_link, MINIMAL, MAX_FRIEND, n_zeros_conv
 
-    DELTA, RHO, GAMMA, C, SIGMA, B1, B2, B3 = settings
+    DELTA, GAMMA, RHO, C, SIGMA, B1, B2, B3 = settings
 
     # Constants
     MAX_FRIEND = 5  # maximum of 5 male and 5 female friends in the questionaire
