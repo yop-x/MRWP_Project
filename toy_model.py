@@ -43,14 +43,14 @@ t_conv = 10 # if g does not change for t_conv periods we have reached convergenc
 
 ### Functions
 
-def u(i, j, X, Y) :
+def u(i, j, X) :
     """ Returns the partial utility given X_i and X_j using the exp(-b*L1-norm
     of their difference)"""
     return math.exp(-b * np.linalg.norm((X[i] - X[j]), ord=1))
 ## where do we get X from? 
 
 
-def U(i, g, X ) :
+def U(i, g, X) :
     """ Returns the full utility of agent i given the current network structure
     g and the matrix of characteristics X """
     d_i = sum(g[i])  # degree of i
