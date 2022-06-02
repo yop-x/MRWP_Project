@@ -2,9 +2,26 @@ import numpy as np
 import math
 import pickle
 from multiprocessing import Pool
+#from run_combined_model import settings_lst, constant_lst
+constant_lst = [5,     # MAX_FRIEND = 5  --> given by the questionnaire
+                10,    # MIN_PROP = 10  --> Useful for steering the probabilities
+                0.1,   # pos_link = 0.1  --> Possibility to form a link on the innitial matrix
+                5000,  # max_iterations = 5000
+                2]     # ALPHA = 2
+
+settings_lst = [0.05,
+                0.15,    # RHO
+                0.65,
+                0.175,
+                0.035,
+                0.1,
+                0.1,
+                0.2]
+DELTA, RHO, GAMMA, C, SIGMA, B1, B2, B3 = settings_lst
+MAX_FRIEND, MIN_PROP, pos_link, max_iterations, ALPHA = constant_lst
+
 
 class ConnectionMatrix:
-    
     def __init__(self, n, p_link_0):
         self.minimal = 1
         self.n = n
@@ -34,13 +51,14 @@ class ConnectionMatrix:
         self.age += self.g
 
 
-class Model:
+class NetworkModel:
 
-    def __init__(self, g, n, X, pos_X):
+    def __init__(self, g, n, X, pos_X, spatial=False):
         self.n = n
         self.pos_X = pos_X
         self.g = g
-
+      #  self.triads = np.diagonal(np.linalg.matrix_power(self.g, 1))
+        self.spatial = spatial
         self.X = X
         self.U = self.make_pre_cal_U()
         self.P = self.make_prop()
@@ -69,6 +87,8 @@ class Model:
         return prop
 
     def make_pre_cal_U(self):
+        DELTA, RHO, GAMMA, C, SIGMA, B1, B2, B3 = settings_lst
+        print(B1)
         """ Make the U matrix for the entire system
         """
         # Setup U
@@ -78,22 +98,23 @@ class Model:
         sex = list(self.X['sex'])
         grade = list(self.X['grade'])
 
-        # Fill U
-        for i in range(self.n):
-            for j in range(self.n):
-                weighted_diffs = [B1*abs(sex[i] - sex[j]),
-                                          B2 * (0 if grade[i] == grade[j] else 1),
-                                          B3 * (0 if race[i] == race[j] else 1)]
-                pre_cal_u[i, j] = math.exp(-sum(weighted_diffs))
-                
-#                ,abs(grade[i] - grade[j])
-#                (1/sum(weighted_diffs) if 
-#                         sum(weighted_diffs) != 0 else 1)
-                
-#                sum([math.exp(-weighted_diff)/len(weighted_diffs)
-#                                        for weighted_diff in weighted_diffs])
-                math.exp(-sum(weighted_diffs))
-                
+        try:
+            new = list(self.X['new'])
+            # Fill U
+            for i in range(self.n) :
+                for j in range(self.n) :
+                    pre_cal_u[i, j] = math.exp(- B1 * abs(sex[i] - sex[j])
+                                               - B2 * abs(grade[i] - grade[j])
+                                               - B3 * (0 if race[i] == race[j] else 1)
+                                               - ((B1+B2+B3)/3) * abs(new[i] - new[j]))
+        except:
+            # Fill U
+            for i in range(self.n):
+                for j in range(self.n):
+                    pre_cal_u[i, j] = math.exp(- B1 * abs(sex[i] - sex[j])
+                                               - B2 * abs(grade[i] - grade[j])
+                                               - B3 * (0 if race[i] == race[j] else 1))
+
 
         return pre_cal_u
 
@@ -110,10 +131,12 @@ class Model:
         a[i] = 0
         indirect_u = np.sum(a)
         #triadic connection gain
-        triads_u = self.triads[i] * self.U[i]
-
+        try:
+            triads_u = self.triads[i] * self.U[i]
+        except:
+            triads_u = self.U[i]
         #total utility
-        return direct_u + GAMMA * mutual_u + DELTA * indirect_u + RHO* triads_u- d_i ** ALPHA * C
+        return direct_u + GAMMA * mutual_u + DELTA * indirect_u - d_i ** ALPHA * C # + RHO * triads_u
 
     def V_total(self, i):
         #Set the potential of the components initially to 0
@@ -142,20 +165,33 @@ class Model:
         #total potential. It will be called in def run
         V_tot = direct_V + GAMMA * mutual_V + DELTA * indirect_V + RHO * triads_V - d_i_V
 
-    def step(self):
-        """ Randomly selects an agent i to revise their link with another random
-        agent j. Returns the updated adjacency matrix """
+    def step(self, i=-1, r1=-1):
+        """ Revises the tie of agents i and r1 and updates g accordingly  """
 
         # Add noise and shuffle indexes
         eps = np.random.normal(scale=SIGMA, size=self.n*2)
         np.random.shuffle(self.indexes)
 
-        for i in self.indexes:
-            # Choose new connection
-            r1 = i
-            while r1 == i:
-                r1 = np.random.choice(self.indexes, p=self.P[i])
+        if i == r1 == -1 and not self.spatial:
+            for i in self.indexes:
+                # Choose new connection
+                r1 = i
+                while r1 == i:
+                    r1 = np.random.choice(self.indexes, p=self.P[i])
 
+                # find value for new connection and removed connection
+                self.g.g[i, r1] = 0
+                U_without = self.U_of_matrix(i) + eps[i]
+
+                self.g.g[i, r1] = 1
+                U_with = self.U_of_matrix(i) + eps[-i]
+
+                # Evaluate better option
+                if U_without > U_with:
+                    self.g.g[i, r1] = 0
+                else:
+                    self.g.g[i, r1] = 1
+        elif i != r1 and self.spatial:
             # find value for new connection and removed connection
             self.g.g[i, r1] = 0
             U_without = self.U_of_matrix(i) + eps[i]
@@ -169,7 +205,7 @@ class Model:
             else:
                 self.g.g[i, r1] = 1
 
-        self.triads= np.diagonal(np.linalg.matrix_power(self.g, 3))
+        # self.triads= np.diagonal(np.linalg.matrix_power(self.g, 3))
 
     def save2pickle(self, pickle_name):
         """
@@ -195,29 +231,29 @@ class Model:
             # Perform a step and append the new network
             self.step()
             self.g_sequence.append(self.g.g.copy())
-            
+
             # Get rid of all g_(t-k) with k >= n_zeros_conv
             # this keeps only the g matrices in memory that we need to calculate
             # the convergence criterion (avoids memory issues).
             if t > n_zeros_conv:
                 self.g_sequence = self.g_sequence[1:]
-                
+
                 # Convergence rule: Count the number of changes in g in the
                 # n_zeros_conv last periods
-                last_changes = [np.linalg.norm((self.g_sequence[-k-2] - 
+                last_changes = [np.linalg.norm((self.g_sequence[-k-2] -
                         self.g_sequence[-1]), ord=1) for k in range(n_zeros_conv)]
-                        
+
                 # stop if there were 0 changes in the last n_zeros_conv periods
                 if t > n_zeros_conv and all(last_changes==np.zeros(n_zeros_conv)):
                     print('Converged after {} steps'.format(t+1))
                     #print the potential at convergence as well
-                    print('The total potential of the network at convergence was:', V_tot )
+                    print('The total potential of the network at convergence was:', V_tot)
                     break
-            
+
             # Print a statement if simulation did not converge
             if t == total_time-1:
                 print('No convergence reached in {} steps'.format(total_time))
-                
+
             # Produce a plot and diagnostics every t_plot steps
             if t % t_plot == 0:
                 print("degree:", np.sum(self.g.g))
@@ -231,7 +267,7 @@ class Model:
         to max_friend male and female friends for each agent
         """
         print('ranking...')
-        
+
         value_of_con = np.zeros((self.n, self.n))
         for i in range(self.n):
             for j in range(self.n):
@@ -274,7 +310,7 @@ class Model:
 
             for friend in range(self.n):
                 try:
-                    if not friend in ind:
+                    if friend not in ind:
                         self.g.g[i][friend] = 0
                 except:
                     pass
@@ -292,15 +328,15 @@ def run(settings, X):
     # Constants
     MAX_FRIEND = 5  # maximum of 5 male and 5 female friends in the questionaire
     MIN_PROP = 1000  # 0 means meeting similar individuals more likely,
-    # high values -> approaching uniform probabilities 
-    
+    # high values -> approaching uniform probabilities
+
     # number of agents
     n_agents = len(X)
-    
+
     # Possibility to form a link on the initial matrix
     avg_initial_links = 5 # desired average degree in initial network
     pos_link = avg_initial_links/n_agents
-    
+
     max_iterations = 5000
     ALPHA = 2 # makes cost quadratic in degree
 
@@ -311,12 +347,10 @@ def run(settings, X):
 
     # Make model and connection matrix
     g = ConnectionMatrix(n_agents, pos_link)
-    M = Model(g, n_agents, X, [])
+    M = NetworkModel(g, n_agents, X, [])
 
     # Run and rank the model
     M.run(max_iterations)
     M.rank()  # chooses best 5 female and male friends
 
     return M.g.g
-
-
