@@ -5,13 +5,14 @@ import pickle
 from SALib.analyze import sobol
 import numpy as np
 
-_var = ['Delta', 'Gamma', 'C', 'Sigma', "b_1", 'b_2', 'b_3']
+_var = ['Delta', 'Gamma', 'Rho', 'C', 'Sigma', "b_1", 'b_2', 'b_3']
 
 problem = {
         'num_vars': len(_var),
         'names': _var,
         'bounds': [[0, 3],
                     [0, 1],
+                    [0, 1], 
                     [0, 3],
                     [0, 1],
                     [0, 3],
@@ -19,7 +20,7 @@ problem = {
                     [0, 3]]
     }
 
-settings =  [0.05, 0.65, 0.175, 0.035, 0.1, 0.1, 0.2]
+settings =  [0.05, 0.65, 0.1, 0.175, 0.035, 0.1, 0.1, 0.2]
 
 label = {'av_degree':'average degree',
          'mut_prop':'propotion of mutual dyads',
