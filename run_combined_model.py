@@ -6,6 +6,8 @@ import pickle
 """ If not done yet, download X_list.pkl and g_list.pkl from the Google Drive link into the
     same directory as this file. """
 
+animate = False
+
 constant_lst = [5,     # MAX_FRIEND = 5  --> given by the questionnaire
                 10,    # MIN_PROP = 10  --> Useful for steering the probabilities
                 0.1,   # pos_link = 0.1  --> Possibility to form a link on the innitial matrix
@@ -21,6 +23,11 @@ settings_lst = [0.05,
                 0.1,
                 0.2]
 
+def run_abm_without_animation(model, iterations):
+    for _ in range(iterations):
+        model.step()
+    model.nw.rank()
+    return model.nw.g.g
 
 def run_both(settings, constants, schools, nw_plot_steps=False, visualize=True):
     with open("X_list.pkl", mode="rb") as X_file, open("g_list.pkl", mode="rb") as g_file:
@@ -47,7 +54,7 @@ def run_both(settings, constants, schools, nw_plot_steps=False, visualize=True):
         for school in schools:
             X = big_x[school]
             n_agents = len(X['sex'])
-
+            print("n_agents:", n_agents)
             # Plot variables
             if nw_plot_steps:
                 possible_X = [i[0] for i in list(X.groupby(['sex', 'race']))]
@@ -59,16 +66,18 @@ def run_both(settings, constants, schools, nw_plot_steps=False, visualize=True):
             # Make model and connection matrix
             g = ConnectionMatrix(n_agents, pos_link)
             nw = NetworkModel(g, n_agents, X, possible_X, spatial=True)
-            abm = SchoolModel(n_agents, nw)
+            abm = SchoolModel(n_agents, nw, voice_sigma=0.15, talk_prob_sigma=0.1)
 
-            # Run and rank the model
-            #M.run(max_iterations, plot_step)
-            animate_model(abm, 500, 50)
-            print("OI MATE")
-            nw.rank()  # chooses best 5 female and male friends
+            graph = animate_model(abm, 900, max_iterations) if animate \
+                else run_abm_without_animation(abm, max_iterations)
+
+            degree, mut_prop, cluster_coef, segreg_ind = analyse_network(graph, big_x[school])
+            print(analyse_network(graph, big_x[school]))
+
+            # Do things with the statistics here, like making plots and saving them in a "results" folder
 
 
-run_both(settings_lst, constant_lst, [1], False, True)
+run_both(settings_lst, constant_lst, [1, 2, 3], False, True)
 
 
 

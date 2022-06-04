@@ -68,20 +68,25 @@ def animate_model(my_model, px_h, max_it):
                 done = True
 
         my_model.step()
+
+        """ DRAW: """
+
+        draw_grid(my_model.grid, px_h, screen)
+
+        hcw = px_h//(2*my_model.grid.height)
+        draw_students(my_model.grid, Color("red"), hcw, screen)
+
+        """ CHECK IF MAX_IT IS REACHED """
         it += 1
         if it == max_it:
             done = True
 
-        """ DRAW: """
-
-        draw_grid(my_model.grid, 500, screen)
-
-        hcw = px_h//(2*my_model.grid.height)
-        draw_students(my_model.grid, Color("red"), hcw, screen)
+        """ DISPLAY UPDATE """
 
         pygame.display.update()
         clock.tick(FPS)
 
     pygame.quit()
-    sys.exit()
 
+    my_model.nw.rank()  # chooses best 5 female and male friends
+    return my_model.nw.g.g
