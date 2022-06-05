@@ -126,7 +126,7 @@ def V(i, g, X):
                 else:
                     fr_in_common_u += g[i, j] * (g[j, k] + g[k, j]) * (g[k, i] + g[i, k]) * u(i, j, X) * u(j, k, X) * u(k, i, X)
 
-    return direct_u + gamma * mutual_u + delta * indirect_u + beta * popularity_u + rho * fr_in_common_u/3 - cost
+    return direct_u + gamma * mutual_u + delta * indirect_u + beta * popularity_u + rho * fr_in_common_u - cost
 
 
 def step(g, X) :
