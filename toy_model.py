@@ -15,8 +15,8 @@ from multiprocessing import Pool
 
 
 ### Global parameter inputs
-
-n = 10 # Number of agents
+#Arbitrary parameters to see what affects the network in which way
+n = 30 # Number of agents
 delta = 0.3  # weight placed on indirect links
 gamma = 0.8  # weight placed on additional utility derived from a mutual link
 c = 0.02  # cost of forming and maintaining links
@@ -66,7 +66,7 @@ def U(i, g, X) :
                 continue
             else :
                 indirect_u += g[i, j] * g[j, k] * u(i, k, X)
-
+#This line untill line 129 is added for this project
     popularity_u = 0
     for j in range(n):
         for k in range(n):
