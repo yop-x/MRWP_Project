@@ -14,15 +14,16 @@ constant_lst = [5,     # MAX_FRIEND = 5  --> given by the questionnaire
                 5000,  # max_iterations = 5000
                 2]     # ALPHA = 2
 
-settings_lst = [0.05,
+settings_lst = [0.3, #DELTA
                 0.15,    # RHO
-                0.65,
-                0.175,
+                0.1
+                0.25,          #C
                 0.035,
-                0.1,
-                0.1,
-                0.2]
-
+                0.05,
+                0.07,
+                0.09]]
+# DELTA, RHO, GAMMA, C, SIGMA, B1, B2, B3 = settings_lst
+# the paper in the end used setting_lst =
 def run_abm_without_animation(model, iterations):
     for _ in range(iterations):
         model.step()
@@ -87,6 +88,3 @@ def run_both(settings, constants, schools, nw_plot_steps=False, visualize=True):
             print(triad_lst)
 
 run_both(settings_lst, constant_lst, [1], False, True)
-
-
-
