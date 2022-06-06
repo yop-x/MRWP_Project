@@ -129,14 +129,14 @@ class NetworkModel:
         a = (self.g.g.T.dot(self.g.g[i, :]) * self.U)[i]
         a[i] = 0
         indirect_u = np.sum(a)
-        #triadic connection gain
+        #triadic connection gain, added for this project
         try:
             triads_u = self.triads[i] * self.U[i]
         except:
             triads_u = self.U[i]
         #total utility
         return direct_u + GAMMA * mutual_u + DELTA * indirect_u - d_i ** ALPHA * C # + RHO * triads_u
-
+    #This function is added for this project
     def V_total(self, i):
         #Set the potential of the components initially to 0
         d_i_V = 0
@@ -203,7 +203,7 @@ class NetworkModel:
                 self.g.g[i, r1] = 0
             else:
                 self.g.g[i, r1] = 1
-
+        #Added for this project:
         # self.triads= np.diagonal(np.linalg.matrix_power(self.g, 3))
 
     def save2pickle(self, pickle_name):
