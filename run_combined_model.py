@@ -14,16 +14,15 @@ constant_lst = [5,     # MAX_FRIEND = 5  --> given by the questionnaire
                 5000,  # max_iterations = 5000
                 2]     # ALPHA = 2
 
-settings_lst = [0.3, #DELTA
+settings_lst = [0.05,
                 0.15,    # RHO
-                0.1
-                0.25,          #C
+                0.65,
+                0.175,
                 0.035,
-                0.05,
-                0.07,
-                0.09]]
-# DELTA, RHO, GAMMA, C, SIGMA, B1, B2, B3 = settings_lst
-# the paper in the end used setting_lst =
+                0.1,
+                0.1,
+                0.2]
+
 def run_abm_without_animation(model, iterations):
     for _ in range(iterations):
         model.step()
@@ -72,13 +71,22 @@ def run_both(settings, constants, schools, nw_plot_steps=False, visualize=True):
             graph = animate_model(abm, 900, max_iterations) if animate \
                 else run_abm_without_animation(abm, max_iterations)
 
-            degree, mut_prop, cluster_coef, segreg_ind = analyse_network(graph, big_x[school])
-            print(analyse_network(graph, big_x[school]))
+            degree, mut_prop, cluster_coef, segreg_ind, triad_lst = analyse_network(graph, big_x[school])
+            """ Do things with the statistics here, like making plots and saving them in a "results" folder.
+            
+            Here is a list of the list variables you can work with and an overview of what they contain
+            
+            degree = [mean_of_degree, std_of_degree]
+            mut_prop = [mean_mut_prop, std_mut_prop]
+            cluster_coef = [mean_cluster_coef, std_cluster_coef]
+            segreg_ind =   [[mean_seg_ind_sex, std_seg_ind_sex],
+                            [mean_seg_ind_race, std_seg_ind_race],
+                            [mean_seg_ind_grade, std_seg_ind_grade]]
+            triad_lst = [triads, triad_prop, total_triads, total_degree]
+            """
+            print(triad_lst)
 
-            # Do things with the statistics here, like making plots and saving them in a "results" folder
-
-
-run_both(settings_lst, constant_lst, [1, 2, 3], False, True)
+run_both(settings_lst, constant_lst, [1], False, True)
 
 
 

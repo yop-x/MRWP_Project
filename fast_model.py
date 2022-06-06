@@ -411,7 +411,28 @@ def analyse_network(connectivity, characteristics) :
         std_segreg_ind_charac = np.std(segreg_ind_charac)
         segreg_ind.append([mean_segreg_ind_charac, std_segreg_ind_charac])
 
-    return degree, mut_prop, cluster_coef, segreg_ind
+        # TRIADS
+
+    #calculate a list with triads (the diaginonal of g^3)
+    triads = np.diagonal(np.linalg.matrix_power(connectivity, 3))
+
+    total_degree = 0
+    total_triads = 0
+
+    for i in range(len(connectivity)):
+        #degree per node
+        d_i = connectivity[i].sum()
+        #number of triads per node
+        number_of_triads = (triads[i])
+        total_degree += d_i
+        total_triads += number_of_triads
+        #print(degree)
+        #print(number_of_triads)
+
+    triad_prop = total_triads/total_degree
+    triad_lst = [triads, triad_prop, total_triads, total_degree]
+
+    return degree, mut_prop, cluster_coef, segreg_ind, triad_lst
 
 def run(settings, X):
     '''
